@@ -65,12 +65,18 @@ export async function sendAdminNotification(data: {
   office: string;
   startDate?: string;
 }) {
-  const adminEmails = (process.env.ADMIN_EMAIL || "")
+  const adminEmailRaw = process.env.ADMIN_EMAIL || "";
+  console.log("[resend] ADMIN_EMAIL raw value:", JSON.stringify(adminEmailRaw));
+  const adminEmails = adminEmailRaw
     .split(",")
     .map((e) => e.trim())
     .filter(Boolean);
+  console.log("[resend] Parsed admin emails:", adminEmails);
 
-  if (adminEmails.length === 0) return;
+  if (adminEmails.length === 0) {
+    console.warn("[resend] No admin emails found, skipping notification");
+    return;
+  }
 
   const adminDashboardUrl =
     process.env.NEXT_PUBLIC_SITE_URL

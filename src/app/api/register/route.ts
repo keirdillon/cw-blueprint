@@ -18,11 +18,25 @@ export async function POST(req: NextRequest) {
       data: { firstName, lastName, email, phone, office, startDate },
     });
 
-    // Send emails in background — don't block response
-    Promise.all([
-      sendConfirmationEmail(firstName, email),
-      sendAdminNotification({ firstName, lastName, email, phone, office, startDate }),
-    ]).catch((err) => console.error("Email send error:", err));
+    // Send emails — must await on serverless so the runtime doesn't kill the process
+    try {
+      console.log("[register] Sending confirmation email to:", email);
+      await sendConfirmationEmail(firstName, email);
+      console.log("[register] Confirmation email sent");
+    } catch (err) {
+      console.error("[register] Confirmation email error:", err);
+    }
+
+    try {
+      const adminEmailEnv = process.env.ADMIN_EMAIL || "";
+      console.log("[register] ADMIN_EMAIL env:", adminEmailEnv);
+      const adminList = adminEmailEnv.split(",").map((e) => e.trim()).filter(Boolean);
+      console.log("[register] Sending admin notification to:", adminList);
+      await sendAdminNotification({ firstName, lastName, email, phone, office, startDate });
+      console.log("[register] Admin notification sent");
+    } catch (err) {
+      console.error("[register] Admin notification error:", err);
+    }
 
     return NextResponse.json(registration, { status: 201 });
   } catch (err) {
