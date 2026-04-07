@@ -4,11 +4,12 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY || "");
 }
 
-const FROM = "Blueprint Program <blueprint@mycoastalwealth.com>";
+const FROM_REGISTRANT = "Blueprint Program <blueprint@mycoastalwealth.com>";
+const FROM_ADMIN = "Blueprint Notifications <notifications@resend.dev>";
 
 export async function sendConfirmationEmail(firstName: string, email: string) {
   await getResend().emails.send({
-    from: FROM,
+    from: FROM_REGISTRANT,
     to: email,
     subject: "You're Registered — Coastal Blueprint",
     html: `
@@ -127,7 +128,7 @@ export async function sendAdminNotification(data: {
     try {
       console.log("[resend] Sending admin notification to:", adminEmail);
       await resend.emails.send({
-        from: FROM,
+        from: FROM_ADMIN,
         to: adminEmail,
         subject: `New Blueprint Registration: ${data.firstName} ${data.lastName}`,
         html: adminHtml,
