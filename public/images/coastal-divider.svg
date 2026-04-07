@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="800" viewBox="0 0 1920 800">
+  <defs>
+    <linearGradient id="ocean" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3c506f"/>
+      <stop offset="50%" style="stop-color:#5d7fa0"/>
+      <stop offset="100%" style="stop-color:#6b95ba"/>
+    </linearGradient>
+    <linearGradient id="shimmer" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%" style="stop-color:#89adc8;stop-opacity:0.4"/>
+      <stop offset="50%" style="stop-color:#c9dce8;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#5d7fa0;stop-opacity:0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="800" fill="url(#ocean)"/>
+  <ellipse cx="960" cy="300" rx="800" ry="300" fill="url(#shimmer)"/>
+  <path d="M0 500 Q 320 470 640 500 Q 960 530 1280 500 Q 1600 470 1920 500 L1920 800 L0 800 Z" fill="#3c506f" opacity="0.3"/>
+  <path d="M0 580 Q 320 560 640 580 Q 960 600 1280 580 Q 1600 560 1920 580 L1920 800 L0 800 Z" fill="#252f4a" opacity="0.2"/>
+</svg>
