@@ -68,13 +68,13 @@ export default function AdminPage() {
 
   const markContacted = (id: string) =>
     updateRegistration(id, {
-      status: "Contacted",
+      status: "CONTACTED",
       contactedAt: new Date().toISOString(),
     });
 
   const markConfirmed = (id: string) =>
     updateRegistration(id, {
-      status: "Confirmed",
+      status: "CONFIRMED",
       confirmedAt: new Date().toISOString(),
     });
 
@@ -124,19 +124,19 @@ export default function AdminPage() {
   const counts = {
     total: registrations.length,
     new: registrations.filter((r) => r.status === "New").length,
-    contacted: registrations.filter((r) => r.status === "Contacted").length,
-    confirmed: registrations.filter((r) => r.status === "Confirmed").length,
+    contacted: registrations.filter((r) => r.status === "CONTACTED").length,
+    confirmed: registrations.filter((r) => r.status === "CONFIRMED").length,
   };
 
   const statusBadge = (status: string) => {
     const styles: Record<string, string> = {
-      New: "bg-gray-100 text-gray-700",
-      Contacted: "bg-amber-50 text-amber-700",
-      Confirmed: "bg-emerald-50 text-emerald-700",
+      New: "bg-gray-200 text-gray-700",
+      CONTACTED: "bg-amber-100 text-amber-800 border border-amber-300",
+      CONFIRMED: "bg-emerald-100 text-emerald-800 border border-emerald-300",
     };
     return (
       <span
-        className={`inline-block px-2.5 py-1 text-xs font-medium tracking-wide ${styles[status] || styles.New}`}
+        className={`inline-block px-3 py-1 text-xs font-semibold tracking-wide rounded-full ${styles[status] || styles.New}`}
       >
         {status}
       </span>
@@ -227,6 +227,9 @@ export default function AdminPage() {
                     Email
                   </th>
                   <th className="px-4 py-3 font-semibold text-coastal-900">
+                    Phone
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-coastal-900">
                     Office
                   </th>
                   <th className="px-4 py-3 font-semibold text-coastal-900">
@@ -256,6 +259,7 @@ export default function AdminPage() {
                       {r.firstName} {r.lastName}
                     </td>
                     <td className="px-4 py-3 text-gray-500">{r.email}</td>
+                    <td className="px-4 py-3 text-gray-500">{r.phone || "—"}</td>
                     <td className="px-4 py-3 text-gray-500">{r.office}</td>
                     <td className="px-4 py-3 text-gray-500">
                       {r.startDate || "—"}
@@ -298,21 +302,21 @@ export default function AdminPage() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {r.status === "New" && (
                           <button
                             onClick={() => markContacted(r.id)}
-                            className="text-amber-600 hover:text-amber-800 text-xs font-medium transition-colors"
+                            className="border border-amber-400 text-amber-700 hover:bg-amber-50 text-xs font-semibold px-3 py-1.5 transition-colors duration-200"
                           >
-                            Mark Contacted
+                            Contacted
                           </button>
                         )}
-                        {r.status === "Contacted" && (
+                        {(r.status === "New" || r.status === "CONTACTED") && (
                           <button
                             onClick={() => markConfirmed(r.id)}
-                            className="text-emerald-600 hover:text-emerald-800 text-xs font-medium transition-colors"
+                            className="border border-emerald-400 text-emerald-700 hover:bg-emerald-50 text-xs font-semibold px-3 py-1.5 transition-colors duration-200"
                           >
-                            Mark Confirmed
+                            Confirmed
                           </button>
                         )}
                         <button
@@ -322,7 +326,7 @@ export default function AdminPage() {
                               `${r.firstName} ${r.lastName}`
                             )
                           }
-                          className="text-red-400 hover:text-red-600 text-xs font-medium transition-colors"
+                          className="border border-red-300 text-red-600 hover:bg-red-50 text-xs font-semibold px-3 py-1.5 transition-colors duration-200"
                         >
                           Delete
                         </button>
