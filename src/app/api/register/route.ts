@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       console.log("[register] ADMIN_EMAIL env:", adminEmailEnv);
       const adminList = adminEmailEnv.split(",").map((e) => e.trim()).filter(Boolean);
       console.log("[register] Sending admin notification to:", adminList);
-      await sendAdminNotification({ firstName, lastName, email, phone, office, startDate });
+      await sendAdminNotification({ firstName, lastName, email, phone, office, startDate, createdAt: registration.createdAt.toISOString() });
       console.log("[register] Admin notification sent");
     } catch (err) {
       console.error("[register] Admin notification error:", err);

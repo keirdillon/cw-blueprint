@@ -64,6 +64,7 @@ export async function sendAdminNotification(data: {
   phone?: string;
   office: string;
   startDate?: string;
+  createdAt?: string;
 }) {
   const adminEmailRaw = process.env.ADMIN_EMAIL || "";
   console.log("[resend] ADMIN_EMAIL raw value:", JSON.stringify(adminEmailRaw));
@@ -78,44 +79,62 @@ export async function sendAdminNotification(data: {
     return;
   }
 
-  const adminDashboardUrl =
-    process.env.NEXT_PUBLIC_SITE_URL
-      ? `${process.env.NEXT_PUBLIC_SITE_URL}/admin`
-      : "https://blueprint.mycoastalwealth.com/admin";
+  const registeredAt = data.createdAt
+    ? new Date(data.createdAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
+    : new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
 
-  await getResend().emails.send({
-    from: FROM,
-    to: adminEmails,
-    subject: `New Blueprint Registration: ${data.firstName} ${data.lastName}`,
-    html: `
-      <div style="font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #252f4a;">
-        <h2 style="font-size: 20px; margin-bottom: 24px;">New Blueprint Registration</h2>
+  const adminHtml = `
+    <div style="font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 20px; color: #252f4a;">
+      <p style="font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+        A new advisor has registered for <strong>Coastal Blueprint</strong>.
+      </p>
 
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-          <tr>
-            <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8; font-weight: 600; width: 140px;">Name</td>
-            <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8;">${data.firstName} ${data.lastName}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8; font-weight: 600;">Email</td>
-            <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8;">${data.email}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8; font-weight: 600;">Phone</td>
-            <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8;">${data.phone || "—"}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8; font-weight: 600;">Office</td>
-            <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8;">${data.office}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8; font-weight: 600;">Start Date</td>
-            <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8;">${data.startDate || "—"}</td>
-          </tr>
-        </table>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 28px; font-size: 14px;">
+        <tr>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8; color: #737373; width: 160px;">Name</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8; font-weight: 600;">${data.firstName} ${data.lastName}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8; color: #737373;">Email</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8;">${data.email}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8; color: #737373;">Phone</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8;">${data.phone || "—"}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8; color: #737373;">Office</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8;">${data.office}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8; color: #737373;">Start Date at Coastal Wealth</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8;">${data.startDate || "—"}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8; color: #737373;">Registered</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e8e8e8;">${registeredAt}</td>
+        </tr>
+      </table>
 
-        <a href="${adminDashboardUrl}" style="display: inline-block; background: #252f4a; color: #ffffff; padding: 12px 24px; text-decoration: none; font-size: 14px; letter-spacing: 0.5px;">View Admin Dashboard →</a>
-      </div>
-    `,
-  });
+      <a href="https://blueprint.mycoastalwealth.com/admin" style="display: inline-block; background: #252f4a; color: #ffffff; padding: 12px 24px; text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.5px;">View Admin Dashboard &rarr;</a>
+    </div>
+  `;
+
+  const resend = getResend();
+
+  // Send individually to each admin
+  for (const adminEmail of adminEmails) {
+    try {
+      console.log("[resend] Sending admin notification to:", adminEmail);
+      await resend.emails.send({
+        from: FROM,
+        to: adminEmail,
+        subject: `New Blueprint Registration: ${data.firstName} ${data.lastName}`,
+        html: adminHtml,
+      });
+      console.log("[resend] Admin notification sent to:", adminEmail);
+    } catch (err) {
+      console.error("[resend] Failed to send to", adminEmail, err);
+    }
+  }
 }
