@@ -4,12 +4,11 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY || "");
 }
 
-const FROM_REGISTRANT = "Blueprint Program <blueprint@mycoastalwealth.com>";
-const FROM_ADMIN = "Blueprint Notifications <notifications@resend.dev>";
+const FROM = "Blueprint Program <blueprint@mycoastalwealth.com>";
 
 export async function sendConfirmationEmail(firstName: string, email: string) {
   await getResend().emails.send({
-    from: FROM_REGISTRANT,
+    from: FROM,
     to: email,
     subject: "You're Registered — Coastal Blueprint",
     html: `
@@ -121,21 +120,15 @@ export async function sendAdminNotification(data: {
     </div>
   `;
 
-  const resend = getResend();
+  // 1-second delay to avoid Resend rate limiting (5/sec)
+  await new Promise(resolve => setTimeout(resolve, 1000));
 
-  // Send individually to each admin
-  for (const adminEmail of adminEmails) {
-    try {
-      console.log("[resend] Sending admin notification to:", adminEmail);
-      await resend.emails.send({
-        from: FROM_ADMIN,
-        to: adminEmail,
-        subject: `New Blueprint Registration: ${data.firstName} ${data.lastName}`,
-        html: adminHtml,
-      });
-      console.log("[resend] Admin notification sent to:", adminEmail);
-    } catch (err) {
-      console.error("[resend] Failed to send to", adminEmail, err);
-    }
-  }
+  console.log("[resend] Sending admin notification to:", adminEmails);
+  await getResend().emails.send({
+    from: FROM,
+    to: adminEmails,
+    subject: `New Blueprint Registration: ${data.firstName} ${data.lastName}`,
+    html: adminHtml,
+  });
+  console.log("[resend] Admin notification sent");
 }
